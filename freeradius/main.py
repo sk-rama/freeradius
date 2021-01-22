@@ -6,7 +6,6 @@ from typing import Optional
 from radius_test import routes_items
 
 app = FastAPI()
-aaabbbcccc
 
 class Item(BaseModel):
     name: str
