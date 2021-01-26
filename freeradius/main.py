@@ -3,9 +3,11 @@ from fastapi import FastAPI, Depends, Header, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 
-from radius_test import routes_items
+from app_radius1 import routes_items
 
 app = FastAPI()
+
+app.include_router(routes_items.router, prefix="/radius1")
 
 class Item(BaseModel):
     name: str
