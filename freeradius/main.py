@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends, Header, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 
-from app_radius1 import routes_items
+from app_test import routes_items
 
 app = FastAPI()
 
