@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Header
 from pydantic import BaseModel, EmailStr, validator
 from typing import Optional, List
 from datetime import datetime
@@ -32,9 +32,9 @@ async def read_item(item_id: str):
         return {**fake_users[item_id]}
 
 @router.get("/item/{item_id}")
-async def read_item(item_id: str):
+async def read_item(item_id: str, user_agent: Optional[str] = Header(None)):
     if item_id in fake_users:
-        return {**fake_users[item_id]}
+        return {**fake_users[item_id], **{"User-Agent": user_agent}}
 
 
 @router.put("/{item_id}", tags=["custom"], responses={403: {"description": "Operation forbidden"}})
