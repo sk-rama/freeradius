@@ -1,13 +1,25 @@
-from fastapi import APIRouter, Header
+from fastapi import APIRouter, Header, Depends
 from pydantic import BaseModel, EmailStr, validator
 from typing import Optional, List
 from datetime import datetime
+
+from sqlalchemy.orm import Session
+from .database import SessionLocal
+from . import db_functions as fnct 
 
 router = APIRouter()
 
 fake_users = { "user1": {"id": 1, "password": "pass1", "name": "Prvni Jmeno", "company": "company1", "email": "email@email.cz"}, 
                "user2": {"id": 2, "password": "pass2", "name": "Druhe Jmeno", "company": "company2", "email": "email@email.cz"}
 }  
+
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 class UserOut(BaseModel):
     id: int
@@ -19,6 +31,18 @@ class UserOut(BaseModel):
     @validator('ts', pre=True, always=True)
     def set_ts_now(cls, v):
         return v or datetime.now()
+
+
+@router.get("/getmaxid/{db_id}")
+def get_max_id(db_id:str, db: Session = Depends(get_db)):
+    db_id = str(db_id)
+    max_id = get_max_id_from_column(db_session=db, model_column=db_id)
+    return users   
+
+@router.get("/get_next_ipaddress/")
+def get_next_ip(db: Session = Depends(get_db)):
+    ip_address = fnct.get_next_ip_address(db_session=db)
+    return ip_address     
 
 
 @router.get("/")
