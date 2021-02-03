@@ -1,17 +1,26 @@
-from fastapi import APIRouter, Header, Depends
-from pydantic import BaseModel, EmailStr, validator
+from fastapi import APIRouter, Header, Depends, HTTPException
 from typing import Optional, List
-from datetime import datetime
+import re
 
 from sqlalchemy.orm import Session
 from .database import SessionLocal
-from . import db_functions as fnct 
+from . import db_functions as fnct
+from . import models_io 
 
 router = APIRouter()
 
 fake_users = { "user1": {"id": 1, "password": "pass1", "name": "Prvni Jmeno", "company": "company1", "email": "email@email.cz"}, 
                "user2": {"id": 2, "password": "pass2", "name": "Druhe Jmeno", "company": "company2", "email": "email@email.cz"}
-}  
+} 
+
+def validate_tel_number(tel_number: str) -> bool:
+    if tel_number[0:3] != '420':
+        raise HTTPException(status_code=404, detail='Tel. Number must start with string 420')
+    if len(tel_number) != 12:
+        raise HTTPException(status_code=404, detail='Tel. Number must contain 12 numbers')
+    if len(tel_number) != len(re.match('[0-9]*', tel_number).group(0)):
+        raise HTTPException(status_code=404, detail='Tel. Number must contain only numbers')
+    return True
 
 # Dependency
 def get_db():
@@ -21,23 +30,20 @@ def get_db():
     finally:
         db.close()
 
-class UserOut(BaseModel):
-    id: int
-    name = str
-    company: Optional[str] = None
-    email: Optional[EmailStr] = None
-    ts: datetime = None
+@router.get("/tel_number/{tel_number}", response_model=models_io.TelNumberOut)
+async def get_number_from_db(tel_number: str, db: Session = Depends(get_db)):
+    if validate_tel_number(tel_number=tel_number):
+        result = fnct.get_number_from_radreply(db_session=db, tel_number=tel_number)
+        if result is None:
+            raise HTTPException(status_code=404, detail='Tel. Number not found')
+        else:
+            return result
+     
 
-    @validator('ts', pre=True, always=True)
-    def set_ts_now(cls, v):
-        return v or datetime.now()
-
-
-@router.get("/getmaxid/{db_id}")
-def get_max_id(db_id:str, db: Session = Depends(get_db)):
-    db_id = str(db_id)
-    max_id = get_max_id_from_column(db_session=db, model_column=db_id)
-    return users   
+@router.get("/getmaxid/RadCheck/")
+def get_max_id_from_radcheck(db: Session = Depends(get_db)):
+    max_id = fnct.get_max_id_from_radcheck(db_session=db)
+    return max_id   
 
 @router.get("/get_next_ipaddress/")
 def get_next_ip(db: Session = Depends(get_db)):
@@ -50,7 +56,7 @@ async def read_items():
     return [{"name": "Item Foo"}, {"name": "item Bar"}]
 
 
-@router.get("/{item_id}", response_model=UserOut)
+@router.get("/{item_id}", response_model=models_io.UserOut)
 async def read_item(item_id: str):
     if item_id in fake_users:
         return {**fake_users[item_id]}

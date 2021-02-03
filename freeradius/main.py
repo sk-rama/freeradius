@@ -24,23 +24,23 @@ class Item(BaseModel):
     tax: Optional[float] = None
 
 
-@app.post("/items/")
-async def create_item(item: Item):    
-    return item
+#@app.post("/items/")
+#async def create_item(item: Item):    
+#    return item
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World2"}
+#@app.get("/")
+#async def root():
+#    return {"message": "Hello World2"}
 
 
-@app.get("/items/{item_id}")
-async def read_item(item_id: int):    
-    return {"item_id": item_id}
+#@app.get("/items/{item_id}")
+#async def read_item(item_id: int):    
+#    return {"item_id": item_id}
 
-@app.get("/info/")
-async def get_info():
-    settings = get_settings()
-    return settings.app_name    
+#@app.get("/info/")
+#async def get_info():
+#    settings = get_settings()
+#    return settings.app_name    
 
 
 if __name__ == "__main__":
