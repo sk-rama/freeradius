@@ -1,5 +1,5 @@
 #GET http://127.0.0.1:8000/radius1/get_next_ipaddress/ HTTP/1.1
 #content-type: application/json
 
-GET http://127.0.0.1:8000/radius1/getmaxid/RadReply.id/ HTTP/1.1
+GET http://127.0.0.1:8000/radius1/getmaxid/RadCheck/ HTTP/1.1
 content-type: application/json

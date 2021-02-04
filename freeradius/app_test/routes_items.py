@@ -38,6 +38,17 @@ async def get_number_from_db(tel_number: str, db: Session = Depends(get_db)):
             raise HTTPException(status_code=404, detail='Tel. Number not found')
         else:
             return result
+
+@router.post("/tel_number/{tel_number}")
+async def add_number_to_db(tel_number: str, db: Session = Depends(get_db)):
+    if validate_tel_number(tel_number=tel_number):
+        if fnct.exist_in_db(db_session=db, numbers=tel_number.split()):
+            raise HTTPException(status_code=404, detail='Tel. Number exist in database') 
+        else:   
+            fnct.add_to_db(db_session=db, tel_number=tel_number)
+            return {"status": "True"} 
+    else:
+        return {"status": "False"}         
      
 
 @router.get("/getmaxid/RadCheck/")
