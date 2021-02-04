@@ -46,40 +46,52 @@ async def add_number_to_db(tel_number: str, db: Session = Depends(get_db)):
             raise HTTPException(status_code=404, detail='Tel. Number exist in database') 
         else:   
             fnct.add_to_db(db_session=db, tel_number=tel_number)
-            return {"status": "True"} 
+            return {tel_number: "True"} 
     else:
-        return {"status": "False"}         
+        return {tel_number: "False"}
+
+@router.post("/tel_numbers/")
+async def add_list_of_tel_numbers_to_db(tel_numbers: models_io.TelNumbersIn, db: Session = Depends(get_db)):
+    # convert models_io.TelNumbersIn Pydantic model to dict()
+    tel_numbers = tel_numbers.dict()
+    # remove duplicates from dict tel_numbers and key tel_numbers
+    tel_numbers = list(set(tel_numbers["tel_numbers"]))
+    # remove tel. numbers exists in db 
+    unique_numbers = [item for item in tel_numbers if (not fnct.exist_in_db(db_session=db, numbers=item.split()))]
+    # add unique_numbers items to db and return dict where key is tel.number and value is True/False from function add_to_db(...)
+    status = {item: fnct.add_to_db(db_session=db, tel_number=item) for item in unique_numbers}
+    return status  
      
 
-@router.get("/getmaxid/RadCheck/")
-def get_max_id_from_radcheck(db: Session = Depends(get_db)):
-    max_id = fnct.get_max_id_from_radcheck(db_session=db)
-    return max_id   
+# @router.get("/getmaxid/RadCheck/")
+# def get_max_id_from_radcheck(db: Session = Depends(get_db)):
+#     max_id = fnct.get_max_id_from_radcheck(db_session=db)
+#     return max_id   
 
-@router.get("/get_next_ipaddress/")
-def get_next_ip(db: Session = Depends(get_db)):
-    ip_address = fnct.get_next_ip_address(db_session=db)
-    return ip_address     
-
-
-@router.get("/")
-async def read_items():
-    return [{"name": "Item Foo"}, {"name": "item Bar"}]
+# @router.get("/get_next_ipaddress/")
+# def get_next_ip(db: Session = Depends(get_db)):
+#     ip_address = fnct.get_next_ip_address(db_session=db)
+#     return ip_address     
 
 
-@router.get("/{item_id}", response_model=models_io.UserOut)
-async def read_item(item_id: str):
-    if item_id in fake_users:
-        return {**fake_users[item_id]}
-
-@router.get("/item/{item_id}")
-async def read_item(item_id: str, user_agent: Optional[str] = Header(None)):
-    if item_id in fake_users:
-        return {**fake_users[item_id], **{"User-Agent": user_agent}}
+# @router.get("/")
+# async def read_items():
+#     return [{"name": "Item Foo"}, {"name": "item Bar"}]
 
 
-@router.put("/{item_id}", tags=["custom"], responses={403: {"description": "Operation forbidden"}})
-async def update_item(item_id: str):
-    if item_id != "foo":
-        raise HTTPException(status_code=403, detail="You can only update the item: foo")
-    return {"item_id": item_id, "name": "The Fighters"}    
+# @router.get("/{item_id}", response_model=models_io.UserOut)
+# async def read_item(item_id: str):
+#     if item_id in fake_users:
+#         return {**fake_users[item_id]}
+
+# @router.get("/item/{item_id}")
+# async def read_item(item_id: str, user_agent: Optional[str] = Header(None)):
+#     if item_id in fake_users:
+#         return {**fake_users[item_id], **{"User-Agent": user_agent}}
+
+
+# @router.put("/{item_id}", tags=["custom"], responses={403: {"description": "Operation forbidden"}})
+# async def update_item(item_id: str):
+#     if item_id != "foo":
+#         raise HTTPException(status_code=403, detail="You can only update the item: foo")
+#     return {"item_id": item_id, "name": "The Fighters"}    

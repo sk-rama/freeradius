@@ -37,8 +37,6 @@ def exist_in_db(db_session: Session, numbers: List[str]):
     except:
         print('Nastala chyba')
 
-    
-
 def get_number_from_radreply(db_session, tel_number:str):
     result = db_session.query(models_db.RadReply).filter(models_db.RadReply.username==tel_number).first()
     return result          
@@ -64,11 +62,9 @@ def add_to_db(db_session: Session, tel_number: str):
             db_session.add(model_1)
             db_session.add(model_2)
             db_session.add(model_3)
-            db_session.commit()
-
-            return True
-        else:
-            return False
     except: 
         db_session.rollback()
         return False
+    else:  
+        db_session.commit()
+        return True
