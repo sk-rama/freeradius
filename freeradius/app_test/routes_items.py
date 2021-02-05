@@ -39,6 +39,15 @@ async def get_number_from_db(tel_number: str, db: Session = Depends(get_db)):
         else:
             return result
 
+@router.post("/ip_address/")
+async def get_ip_addresses_asociated_to_tel_numbers(tel_numbers: models_io.TelNumbersIn, db: Session = Depends(get_db)):
+    # convert models_io.TelNumbersIn Pydantic model to dict()
+    tel_numbers = tel_numbers.dict()
+    # remove duplicates from dict tel_numbers and key tel_numbers
+    tel_numbers = list(set(tel_numbers["tel_numbers"]))
+    result = {number: fnct.get_number_from_radreply(db_session=db, tel_number=number).value for number in tel_numbers}
+    return result        
+
 @router.post("/tel_number/{tel_number}")
 async def add_number_to_db(tel_number: str, db: Session = Depends(get_db)):
     if validate_tel_number(tel_number=tel_number):
