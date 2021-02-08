@@ -16,3 +16,14 @@ def test_tel_number():
         "value": "10.16.0.55"
     }
 
+def test_return_ip_addresess():
+    response = client.post("/radius1/ip_address/",
+                           headers={"X-Token": "hailhydra"},
+                           json={"tel_numbers": ["420111222333", "420735715309"]
+                           } 
+    )    
+    assert response.status_code == 200
+    assert response.json() == {"420111222333": "10.16.0.67",
+                               "420735715309": "10.16.0.55"
+    }
+

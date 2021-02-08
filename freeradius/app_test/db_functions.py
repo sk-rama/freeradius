@@ -41,6 +41,8 @@ def get_number_from_radreply(db_session, tel_number:str):
     result = db_session.query(models_db.RadReply).filter(models_db.RadReply.username==tel_number).first()
     return result          
 
+        
+
 def get_next_ip_address(db_session: Session):
     last_ip_list = db_session.query(models_db.RadReply).order_by(models_db.RadReply.id.desc()).limit(1)
     last_ip = last_ip_list[0].value
@@ -68,3 +70,6 @@ def add_to_db(db_session: Session, tel_number: str):
     else:  
         db_session.commit()
         return True
+    finally:
+        session.close()
+
